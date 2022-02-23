@@ -1,3 +1,4 @@
+from math import floor
 import pygame as p
 import chess as c
 
@@ -8,10 +9,10 @@ class BoardGraph():
         self.board = [
             ["r", "n", "b", "q", "k", "b", "n", "r"],
             ["p", "p", "p", "p", "p", "p", "p", "p"],
-            ["-", "-", "-", "-", "-", "-", "-", "-"],
-            ["-", "-", "-", "-", "-", "-", "-", "-"],
-            ["-", "-", "-", "-", "-", "-", "-", "-"],
-            ["-", "-", "-", "-", "-", "-", "-", "-"],
+            [".", ".", ".", ".", ".", ".", ".", "."],
+            [".", ".", ".", ".", ".", ".", ".", "."],
+            [".", ".", ".", ".", ".", ".", ".", "."],
+            [".", ".", ".", ".", ".", ".", ".", "."],
             ["P", "P", "P", "P", "P", "P", "P", "P"],
             ["R", "N", "B", "Q", "K", "B", "N", "R"]
         ]
@@ -62,7 +63,7 @@ class BoardGraph():
         for r in range(8):
             for c in range(8):
                 piece = self.board[r][c]
-                if piece != '-':
+                if piece != '.':
                     square_centre_x, square_centre_y  = [(c+0.5)*self.SQ_SIZE, (r+0.5)*self.SQ_SIZE]
                     pImage = self.IMAGES[piece]
                     pImageXsize, pImageYsize = pImage.get_size()
@@ -77,7 +78,7 @@ class BoardGraph():
     def flip(self):
         p.display.flip()
 
-    def movePiece(self, homeSquare, destSquare, newPiece='-'):
+    def movePiece(self, homeSquare, destSquare, newPiece='.'):
         '''
         Input: 
             homeSquare: what piece to move, for example "d2"
@@ -89,13 +90,33 @@ class BoardGraph():
         destFile = ord(destSquare.lower()[0])-97
         destRank = 8 - int(destSquare[1])
         currentPiece = self.board[homeRank][homeFile]
-        if currentPiece !='-':
-            self.board[homeRank][homeFile]='-'
-            if newPiece!='-':  #Only when promoting...
+        if currentPiece !='.':
+            self.board[homeRank][homeFile]='.'
+            if newPiece!='.':  #Only when promoting...
                 self.board[homeRank][homeFile]=newPiece
             else:              #Usual case
                 self.board[destRank][destFile]=currentPiece
+    def updatePosition(self, position):
+        newPosition = [ ['.','.','.','.','.','.','.','.'],
+                        ['.','.','.','.','.','.','.','.'],
+                        ['.','.','.','.','.','.','.','.'],
+                        ['.','.','.','.','.','.','.','.'],
+                        ['.','.','.','.','.','.','.','.'],
+                        ['.','.','.','.','.','.','.','.'],
+                        ['.','.','.','.','.','.','.','.'],
+                        ['.','.','.','.','.','.','.','.']
+                        ]
+        for square_index in position:
+            newPosition[(63-square_index)//8][square_index%8] = str(position[square_index])
+        self.board = newPosition
+
     def updateBoard(self):
         self.drawBoard()
         self.drawPieces()
         self.flip()
+
+    def getSquareFromXY(self, location):
+        rank = str(int(7-location[1]//self.SQ_SIZE)+1)
+        file = chr(int(ord('A') +location[0]//self.SQ_SIZE))
+        result = file+rank
+        return result
