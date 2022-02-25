@@ -1,3 +1,4 @@
+from asyncio.proactor_events import _ProactorBaseWritePipeTransport
 from math import floor
 import pygame as p
 import chess as c
@@ -24,7 +25,22 @@ class BoardGraph():
         self.IMAGES = {}
         self.COLORS = [p.Color("tan"), p.Color("dimgrey")]
         self.clock = p.time.Clock()
-
+        self.squareName=[[]]
+        self.rank={}
+        self.file={}
+        self.ScreenCoordinates={}
+        self.MatrixCoordinates={}
+        
+        for r in range(8): #For all 8 ranks (rows)
+            tmp = []
+            for f in range(8): #For all 8 files (columns)
+                tmp.append(chr(int(ord('a') + f))+str(r+1))
+                #self.squareName[r][f]=str(int(ord('a') + f))+str(r+1)
+                self.rank[tmp[f]]=r
+                self.file[tmp[f]]=f
+                self.ScreenCoordinates[tmp[f]]=[(7-r)*self.SQ_SIZE, (7-f)*self.SQ_SIZE]
+                self.MatrixCoordinates[tmp[f]]=[r, f]
+            self.squareName.append(tmp)
         self.loadImages()
         self.screen = p.display.set_mode((self.WIDTH, self.HEIGHT))
         self.drawBoard()
@@ -58,6 +74,19 @@ class BoardGraph():
                     img = font.render(chr(ord('A')+c), 'True', self.COLORS[c % 2])
                     rect = img.get_rect()
                     self.screen.blit(img, ((c+1)*self.SQ_SIZE-rect.width, 8*(self.SQ_SIZE)-rect.height-2))
+
+    def highlightPiece(self, squares, color):
+        '''
+        Input: 
+            squares: tuple with what square(s) to higlight, for example ["d2", "a2"]
+            color: what color to use, from pygame selection for instance "blue"
+        '''
+
+        s = p.Surface((self.SQ_SIZE, self.SQ_SIZE))
+        s.set_alpha(100) # Transparency: 0 = transparent, 255 = opaque
+        s.fill(p.Color(color))
+        position = self.ScreenCoordinates[squares[0]]
+        self.screen.blit(s, position)
 
     def drawPieces(self):
         for r in range(8):

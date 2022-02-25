@@ -28,7 +28,7 @@ def main():
                         print("Piece dropped.")
                         InitialSquare="." # So the loop starts again
                         FinalSquare="."
-                    elif c.Move.from_uci()
+                    elif c.Move.from_uci():
                         myBoard.push_uci(currentMove)
                         myBoardWindow.updatePosition(myBoard.piece_map())
                         myBoardWindow.updateBoard()
