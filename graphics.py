@@ -30,15 +30,16 @@ class BoardGraph():
         self.file={}
         self.ScreenCoordinates={}
         self.MatrixCoordinates={}
+        self.LastMove = '.'
         
         for r in range(8): #For all 8 ranks (rows)
             tmp = []
             for f in range(8): #For all 8 files (columns)
                 tmp.append(chr(int(ord('a') + f))+str(r+1))
                 #self.squareName[r][f]=str(int(ord('a') + f))+str(r+1)
-                self.rank[tmp[f]]=r
+                self.rank[tmp[f]]=7-r
                 self.file[tmp[f]]=f
-                self.ScreenCoordinates[tmp[f]]=[(7-r)*self.SQ_SIZE, (7-f)*self.SQ_SIZE]
+                self.ScreenCoordinates[tmp[f]]=[f*self.SQ_SIZE, (7-r)*self.SQ_SIZE]
                 self.MatrixCoordinates[tmp[f]]=[r, f]
             self.squareName.append(tmp)
         self.loadImages()
@@ -74,6 +75,7 @@ class BoardGraph():
                     img = font.render(chr(ord('A')+c), 'True', self.COLORS[c % 2])
                     rect = img.get_rect()
                     self.screen.blit(img, ((c+1)*self.SQ_SIZE-rect.width, 8*(self.SQ_SIZE)-rect.height-2))
+        self.highlightPiece(self.LastMove, "blue")
 
     def highlightPiece(self, squares, color):
         '''
@@ -81,12 +83,12 @@ class BoardGraph():
             squares: tuple with what square(s) to higlight, for example ["d2", "a2"]
             color: what color to use, from pygame selection for instance "blue"
         '''
-
-        s = p.Surface((self.SQ_SIZE, self.SQ_SIZE))
-        s.set_alpha(100) # Transparency: 0 = transparent, 255 = opaque
-        s.fill(p.Color(color))
-        position = self.ScreenCoordinates[squares[0]]
-        self.screen.blit(s, position)
+        if squares!='.' :
+            s = p.Surface((self.SQ_SIZE, self.SQ_SIZE))
+            s.set_alpha(50) # Transparency: 0 = transparent, 255 = opaque
+            s.fill(p.Color(color))
+            position = self.ScreenCoordinates[squares]
+            self.screen.blit(s, position)
 
     def drawPieces(self):
         for r in range(8):
@@ -104,6 +106,26 @@ class BoardGraph():
     def setColors(self, listTwoColors):
         self.COLORS = listTwoColors
 
+    def squareIsEmpty(self, square):
+        if square == '.':
+            return True
+        elif self.pieceInSquare(square)=='.':
+            return True
+        else:
+            return False
+
+    def pieceColor(self, square):
+        return self.pieceInSquare(square).isupper()
+
+    def pieceInSquare(self, square):
+        return self.board[self.rank[square]][self.file[square]]
+
+    def selectSquare(self, square):
+        self.drawBoard()
+        self.highlightPiece(square, 'green')
+        self.drawPieces()
+        self.flip()
+
     def flip(self):
         p.display.flip()
 
@@ -113,19 +135,25 @@ class BoardGraph():
             homeSquare: what piece to move, for example "d2"
             destSquare: where to put it, for example "d4"
             newPiece: in case of promotion what piece to promote to
+            !! WE ASSUME THE MOVEMENT IS ALWAYS VALID !!
         '''
-        homeFile = ord(homeSquare.lower()[0])-97
-        homeRank = 8 - int(homeSquare[1])
-        destFile = ord(destSquare.lower()[0])-97
-        destRank = 8 - int(destSquare[1])
+        homeFile = self.file[homeSquare]
+        homeRank = self.rank[homeSquare]
+        destFile = self.file[destSquare]
+        destRank = self.rank[destSquare]
         currentPiece = self.board[homeRank][homeFile]
         if currentPiece !='.':
             self.board[homeRank][homeFile]='.'
-            if newPiece!='.':  #Only when promoting...
-                self.board[homeRank][homeFile]=newPiece
+            if (currentPiece.lower()=='p' and (destRank==7 or destRank==0)):  #Only when promoting...
+                if (currentPiece.isupper()==True):
+                    self.board[homeRank][homeFile]=newPiece.upper()
+                else:
+                    self.board[homeRank][homeFile]=newPiece.lower()
             else:              #Usual case
                 self.board[destRank][destFile]=currentPiece
-    def updatePosition(self, position):
+        self.LastMove=destSquare
+
+    def updatePosition(self, position, lastDest = '.'):
         newPosition = [ ['.','.','.','.','.','.','.','.'],
                         ['.','.','.','.','.','.','.','.'],
                         ['.','.','.','.','.','.','.','.'],
@@ -138,6 +166,7 @@ class BoardGraph():
         for square_index in position:
             newPosition[(63-square_index)//8][square_index%8] = str(position[square_index])
         self.board = newPosition
+        self.LastMove=lastDest
 
     def updateBoard(self):
         self.drawBoard()
@@ -146,6 +175,6 @@ class BoardGraph():
 
     def getSquareFromXY(self, location):
         rank = str(int(7-location[1]//self.SQ_SIZE)+1)
-        file = chr(int(ord('A') +location[0]//self.SQ_SIZE))
+        file = chr(int(ord('a') +location[0]//self.SQ_SIZE))
         result = file+rank
         return result
