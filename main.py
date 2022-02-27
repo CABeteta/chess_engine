@@ -1,11 +1,11 @@
 import graphics
-import pygame as p
-import chess as c
+import pygame as pg
+import chess as ch
 import time
 
 def main():
     myBoardWindow = graphics.BoardGraph()
-    myBoard = c.Board()
+    myBoard = ch.Board()
     running = True
 
     InitialSquare = "."
@@ -13,12 +13,12 @@ def main():
     currentMove = ".."
 
     while running:
-        for e in p.event.get():
-            if e.type == p.QUIT:
+        for e in pg.event.get():
+            if e.type == pg.QUIT:
                 running = False
-            elif e.type == p.MOUSEBUTTONDOWN:
-                click_location = p.mouse.get_pos() # (x, y) of the mouse
-                if(e.button == p.BUTTON_LEFT):
+            elif e.type == pg.MOUSEBUTTONDOWN:
+                click_location = pg.mouse.get_pos() # (x, y) of the mouse
+                if(e.button == pg.BUTTON_LEFT):
                     if InitialSquare == ".": #Selecting origin
                         InitialSquare = myBoardWindow.getSquareFromXY(click_location)
                         if (myBoard.turn == myBoardWindow.pieceColor(InitialSquare) and myBoardWindow.squareIsEmpty(InitialSquare)==False) :
@@ -32,7 +32,7 @@ def main():
                             InitialSquare="." # So next time we select origin again
                             FinalSquare="."
                             myBoardWindow.selectSquare(InitialSquare) #Unselects
-                        elif c.Move.from_uci(currentMove) in myBoard.legal_moves: #Legal move
+                        elif ch.Move.from_uci(currentMove) in myBoard.legal_moves: #Legal move
                             myBoard.push_uci(currentMove)
                             myBoardWindow.movePiece(InitialSquare, FinalSquare)
                             myBoardWindow.updateBoard()
@@ -46,19 +46,19 @@ def main():
                             FinalSquare="."
                 elif myBoard.move_stack!=[]: #If move stack isn't empty
                     myBoard.pop()
-                    lastDestination=c.square_name(myBoard.peek().to_square).lower()
+                    lastDestination=ch.square_name(myBoard.peek().to_square).lower()
                     myBoardWindow.updatePosition(myBoard.piece_map(), lastDestination)
                     myBoardWindow.updateBoard()
-            elif e.type == p.KEYDOWN:
-                if e.key  == p.K_u:
+            elif e.type == pg.KEYDOWN:
+                if e.key  == pg.K_u:
                     print("UNDO")
-                elif e.key == p.K_r:
+                elif e.key == pg.K_r:
                     print("ROOK")
-                elif e.key == p.K_q:
+                elif e.key == pg.K_q:
                     print("QUEEN")
-                elif e.key == p.K_b:
+                elif e.key == pg.K_b:
                     print("BISHOP")
-                elif e.key == p.K_k:
+                elif e.key == pg.K_k:
                     print("KNIGHT")
 
 
