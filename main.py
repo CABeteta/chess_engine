@@ -46,7 +46,10 @@ def main():
                             FinalSquare="."
                 elif myBoard.move_stack!=[]: #If move stack isn't empty
                     myBoard.pop()
-                    lastDestination=ch.square_name(myBoard.peek().to_square).lower()
+                    if myBoard.move_stack!=[]:
+                        lastDestination=ch.square_name(myBoard.peek().from_square).lower()
+                    else:
+                        lastDestination='.'
                     myBoardWindow.updatePosition(myBoard.piece_map(), lastDestination)
                     myBoardWindow.updateBoard()
             elif e.type == pg.KEYDOWN:
